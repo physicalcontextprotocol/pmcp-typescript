@@ -28,7 +28,7 @@ finished — it is a skeleton, and the changelog says so.**
 
 ### Known limitations (documented, not fixed)
 
-- **The SDK does not compile. 19 TypeScript errors.** Recorded here in
+- **The SDK does not compile. 32 TypeScript errors.** Recorded here in
   full because a count with no breakdown is not actionable:
 
   | Count | Error | Nature |

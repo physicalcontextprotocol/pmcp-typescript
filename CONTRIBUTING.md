@@ -10,7 +10,7 @@ This file covers what is specific to this repository.
 
 ```bash
 npm install
-npm run build     # tsc — currently FAILS with 19 errors
+npm run build     # tsc — currently FAILS with 32 errors
 npm run lint
 npm test
 ```
@@ -21,7 +21,7 @@ useful thing you could add.
 
 ## The SDK does not compile, and that is deliberate to leave visible
 
-`npm run build` fails with 19 TypeScript errors. CI records the count and
+`npm run build` fails with 32 TypeScript errors. CI records the count and
 **fails if it grows** (`error-budget` is the one blocking job), but does
 not pretend the build passes. `CHANGELOG.md` has the full breakdown by
 error code.

@@ -66,7 +66,7 @@ export class PMCPServerClient {
     this.transport = options.transport;
     this.serverCommand = options.serverCommand;
     this.serverUrl = options.serverUrl;
-    this.clientInfo = options.clientInfo || { name: 'pmcp-typescript-client', version: '0.5.0' };
+    this.clientInfo = options.clientInfo || { name: 'pmcp-typescript-client', version: '1.0.0' };
   }
 
   /**
