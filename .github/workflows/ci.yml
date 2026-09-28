@@ -1,0 +1,127 @@
+name: pmcp-typescript CI
+
+# Honest about what this repository is: a skeleton, and one that does not
+# currently compile.
+#
+# `npm run build` fails with 19 TypeScript errors. Those are enumerated in
+# `CHANGELOG.md` and `CONTRIBUTING.md`, and the biggest cluster is not a
+# typo — it is that `src/server.ts` and `src/server_impl.ts` are two
+# competing PMCPServer implementations that `src/index.ts` re-exports
+# simultaneously, producing four TS2308 ambiguity errors. Picking a
+# canonical one is an architecture decision, not a lint fix, so it is not
+# made silently here.
+#
+# Every job below is therefore non-blocking. A green run on this
+# repository means "nothing got worse", and the summary says so in those
+# words. Do not read a green check here as evidence of protocol parity
+# with the Python or Rust SDKs.
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*.*.*"
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+
+  build:
+    name: Build (known failing — non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+  # A regression guard, not a gate. If a PR *adds* compile errors, that is
+  # worse than the standing 19, and it should be visible. The floor of 19
+  # is the count recorded in CHANGELOG.md; if you fix some, lower it in the
+  # same PR that fixes them.
+  error-budget:
+    name: Compile-error budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Compile errors must not exceed the recorded baseline
+        run: |
+          set +e
+          npx tsc --noEmit > /tmp/tsc.log 2>&1
+          COUNT=$(grep -cE "error TS[0-9]+" /tmp/tsc.log || true)
+          COUNT=${COUNT:-0}
+          echo "compile errors: ${COUNT} (recorded baseline: 19)"
+          if [ "${COUNT}" -gt 19 ]; then
+            echo "::error::Compile errors rose from 19 to ${COUNT}. Fixing is not"
+            echo "::error::required, but adding to a known-broken build is."
+            grep -E "error TS[0-9]+" /tmp/tsc.log
+            exit 1
+          fi
+          if [ "${COUNT}" -lt 19 ]; then
+            echo "::warning::Compile errors fell to ${COUNT}. Please lower the"
+            echo "::warning::baseline in this workflow and record it in CHANGELOG.md."
+          fi
+
+  no-tests-yet:
+    name: Report missing test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Flag the absence of a test suite
+        run: |
+          if [ -d tests ] || ls __tests__ src/*.test.ts >/dev/null 2>&1; then
+            echo "::notice::A test suite appears to exist. Wire it into this"
+            echo "::notice::workflow and make this job assert it actually runs."
+            exit 0
+          fi
+          echo "::warning title=No test suite::pmcp-typescript ships no tests."
+          echo "::warning::\`npm test\` exits 0 without running anything. That is a"
+          echo "::warning::placeholder, not a passing suite."
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [build, error-budget, no-tests-yet]
+    if: always()
+    steps:
+      - name: Report status
+        run: |
+          echo "## pmcp-typescript CI Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Job | Blocking? | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----|-----------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| build        | no | ${{ needs.build.result }}        |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| error-budget | **yes** | ${{ needs.error-budget.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| no-tests-yet | no | ${{ needs.no-tests-yet.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**This SDK is a skeleton that does not compile and has no tests.**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "The only blocking check is \`error-budget\`, which merely stops the" >> "$GITHUB_STEP_SUMMARY"
+          echo "19 known compile errors from growing. Nothing in this workflow is" >> "$GITHUB_STEP_SUMMARY"
+          echo "evidence of protocol parity with the Python or Rust SDKs. Do not" >> "$GITHUB_STEP_SUMMARY"
+          echo "treat a green run as anything more than that." >> "$GITHUB_STEP_SUMMARY"
