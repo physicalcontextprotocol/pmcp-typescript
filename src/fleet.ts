@@ -125,7 +125,7 @@ export class PMCPRobotClient extends EventEmitter {
   async initialize(): Promise<Record<string, unknown>> {
     return this.call('initialize', {
       protocolVersion: PMCP_VERSION,
-      clientInfo: { name: 'pmcp-ts-client', version: '0.5.0' },
+      clientInfo: { name: 'pmcp-ts-client', version: '1.0.0' },
     });
   }
 
