@@ -217,6 +217,30 @@ export interface LeaseGrant {
   state: LeaseState;
   expires_at: number;
   remaining_ms?: number;
+  /** Energy bid in joules that won this zone. Carried on the grant so a
+   *  competing bid can be compared against the incumbent without a lookup. */
+  bid_energy_j?: number;
+}
+
+/** Per-robot outcome of a batched actuation request. */
+export interface BatchActuationResult {
+  batch_id: string;
+  results: Record<string, ActuationResult>;
+  succeeded: number;
+  failed: number;
+  energy_consumed_j: number;
+  duration_s?: number;
+}
+
+/** Server metrics as reported by `pmcp/metrics`. */
+export interface MetricsSnapshot {
+  uptime_s: number;
+  requests_total: number;
+  errors_total: number;
+  active_leases: number;
+  connected_robots: number;
+  energy_budget_j?: number;
+  energy_consumed_j?: number;
 }
 
 // ============================================================================
