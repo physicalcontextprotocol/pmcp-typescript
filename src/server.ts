@@ -644,7 +644,7 @@ class LeaseManager {
       }
 
       // Check bid
-      if (req.bid_energy_j! <= existing.bid_energy_j) {
+      if ((req.bid_energy_j ?? 0) <= (existing.bid_energy_j ?? 0)) {
         return {
           lease_id: '',
           robot_id: req.robot_id,

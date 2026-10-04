@@ -117,10 +117,16 @@ export interface LeaseRecord {
   expiresMs: number;
 }
 
+/** Result of a lease acquisition attempt. Internal camelCase, not the wire
+ *  `LeaseGrant` — that is what gets serialized to the client. */
+export interface LeaseOutcome extends LeaseRecord {
+  granted: boolean;
+}
+
 export class LeaseManager {
   private leases = new Map<string, LeaseRecord>();
 
-  acquire(zoneId: string, robotId: string, durationMs: number): LeaseGrant {
+  acquire(zoneId: string, robotId: string, durationMs: number): LeaseOutcome {
     // Check if zone is already held by another robot
     const existing = this.leases.get(zoneId);
     if (existing && existing.expiresMs > Date.now() && existing.robotId !== robotId) {
@@ -165,6 +171,15 @@ export class LeaseManager {
       record.robotId === robotId &&
       record.expiresMs > Date.now()
     );
+  }
+
+  /** Leases granted and not yet expired. Used by the `pmcp/metrics` handler. */
+  activeCount(now: number = Date.now()): number {
+    let n = 0;
+    for (const lease of this.leases.values()) {
+      if (lease.expiresMs > now) n++;
+    }
+    return n;
   }
 
   expireStale(): void {
@@ -281,10 +296,10 @@ export class PMCPServer extends EventEmitter {
       name: options.name,
       description: options.description,
       parameters: options.parameters ?? [],
-      robotId: this.opts.robotId,
-      maxSpeedMs: options.maxSpeedMs ?? 1.0,
-      maxForceN: options.maxForceN ?? 100.0,
-      maxEnergyJ: options.maxEnergyJ ?? 500.0,
+      robot_id: this.opts.robotId,
+      max_speed_m_s: options.maxSpeedMs ?? 1.0,
+      max_force_n: options.maxForceN ?? 100.0,
+      max_energy_j: options.maxEnergyJ ?? 500.0,
     };
     this.actuationHandlers.set(options.name, handler);
     this.actuationSpecs.set(options.name, spec);
@@ -295,10 +310,10 @@ export class PMCPServer extends EventEmitter {
     const spec: SensorSpec = {
       name: options.name,
       description: options.description,
-      sensorType: options.sensorType ?? SensorType.Custom,
+      sensor_type: options.sensorType ?? 'custom',
       unit: options.unit ?? '',
-      robotId: this.opts.robotId,
-      sampleRateHz: options.sampleRateHz ?? 1.0,
+      robot_id: this.opts.robotId,
+      hz: options.sampleRateHz ?? 1.0,
     };
     this.sensorHandlers.set(options.name, handler);
     this.sensorSpecs.set(options.name, spec);
@@ -461,13 +476,13 @@ export class PMCPServer extends EventEmitter {
       result = await handler(p, context);
     } catch (err) {
       const msg = String((err as Error).message ?? err);
-      result = { success: false, energyConsumedJ: 0, durationMs: 0, errorMsg: msg };
+      result = { success: false, robot_id: this.opts.robotId, actuation_name: name, output: {}, error_message: msg };
     }
 
     const duration = performance.now() - start;
     this.actuationCount++;
     this.totalActuationDurationMs += duration;
-    this.energyUsedJ += result.energyConsumedJ ?? 0;
+    this.energyUsedJ += result.energy_consumed_j ?? 0;
 
     this.auditEvent('actuation', {
       actuation: name,
@@ -517,16 +532,12 @@ export class PMCPServer extends EventEmitter {
 
   private getMetrics(): MetricsSnapshot {
     return {
-      actuationCount: this.actuationCount,
-      sensorReadCount: this.sensorReadCount,
-      safetyViolations: this.safetyViolations,
-      avgActuationDurationMs: this.actuationCount > 0
-        ? this.totalActuationDurationMs / this.actuationCount
-        : 0,
-      uptimeSeconds: (Date.now() - this.startTime) / 1000,
-      energyUsedJ: this.energyUsedJ,
-      connectedClients: 0,
-      lastHeartbeatMs: Date.now(),
+      requests_total: this.actuationCount + this.sensorReadCount,
+      errors_total: this.safetyViolations,
+      uptime_s: (Date.now() - this.startTime) / 1000,
+      energy_consumed_j: this.energyUsedJ,
+      active_leases: this.leaseManager ? this.leaseManager.activeCount() : 0,
+      connected_robots: 0,
     };
   }
 

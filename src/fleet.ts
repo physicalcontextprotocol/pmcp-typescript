@@ -6,17 +6,56 @@
 
 import { EventEmitter } from 'eventemitter3';
 import {
-  ActuationResult,
-  BatchActuationResult,
   JsonRpcRequest,
   JsonRpcResponse,
-  LeaseGrant,
-  MetricsSnapshot,
   PmcpError,
   PmcpErrorCode,
-  SensorReading,
   PMCP_VERSION,
 } from './types';
+
+// ── Normalized client-side DTOs ─────────────────────────────────────────────
+// The wire format is snake_case (see ./types). The fleet clients normalize it
+// into camelCase for ergonomics, so these are deliberately distinct from
+// ActuationOutcome / SensorSample / LeaseHandle / FleetMetrics.
+
+export interface ActuationOutcome {
+  success: boolean;
+  robot_id?: string;
+  actuation_name?: string;
+  output?: Record<string, unknown>;
+  finalPose?: Record<string, number>;
+  energyConsumedJ: number;
+  durationMs: number;
+  errorMsg?: string;
+}
+
+export interface SensorSample {
+  sensor_name?: string;
+  robot_id?: string;
+  value: unknown;
+  unit: string;
+  timestampMs: number;
+  quality: number;
+}
+
+export interface LeaseHandle {
+  leaseId: string;
+  zoneId: string;
+  robotId: string;
+  expiresMs: number;
+  granted: boolean;
+}
+
+export interface FleetMetrics {
+  actuationCount: number;
+  sensorReadCount: number;
+  safetyViolations: number;
+  avgActuationDurationMs: number;
+  uptimeSeconds: number;
+  energyUsedJ: number;
+  connectedClients: number;
+  lastHeartbeatMs: number;
+}
 
 // ============================================================================
 // Robot Endpoint Configuration
@@ -129,14 +168,14 @@ export class PMCPRobotClient extends EventEmitter {
     });
   }
 
-  async actuate(name: string, params: Record<string, unknown>): Promise<ActuationResult> {
+  async actuate(name: string, params: Record<string, unknown>): Promise<ActuationOutcome> {
     const result = await this.call<Record<string, unknown>>('actuations/execute', { name, params });
     return {
       success: Boolean(result.success),
       finalPose: result.final_pose as Record<string, number> | undefined,
       energyConsumedJ: Number(result.energy_consumed_j ?? 0),
-      durationMs: Number(result.duration_ms ?? 0),
-      errorMsg: result.error_msg as string | undefined,
+      durationMs: Number(result.duration_s ?? 0) * 1000,  // wire is seconds
+      errorMsg: result.error_message as string | undefined,
     };
   }
 
@@ -147,12 +186,12 @@ export class PMCPRobotClient extends EventEmitter {
 
   // ── sensors ───────────────────────────────────────────────────────────────
 
-  async readSensor(name: string): Promise<SensorReading> {
+  async readSensor(name: string): Promise<SensorSample> {
     const result = await this.call<Record<string, unknown>>('sensors/read', { name });
     return {
       value: result.value,
       unit: String(result.unit ?? ''),
-      timestampMs: Number(result.timestamp_ms ?? Date.now()),
+      timestampMs: Number(result.timestamp ?? Date.now()),
       quality: Number(result.quality ?? 1.0),
     };
   }
@@ -164,7 +203,7 @@ export class PMCPRobotClient extends EventEmitter {
 
   // ── leases ────────────────────────────────────────────────────────────────
 
-  async acquireLease(zoneId: string, durationMs = 30_000): Promise<LeaseGrant> {
+  async acquireLease(zoneId: string, durationMs = 30_000): Promise<LeaseHandle> {
     const result = await this.call<Record<string, unknown>>('leases/acquire', {
       zone_id: zoneId,
       duration_ms: durationMs,
@@ -173,7 +212,7 @@ export class PMCPRobotClient extends EventEmitter {
       leaseId: String(result.lease_id ?? ''),
       zoneId,
       robotId: this.robotId,
-      expiresMs: Number(result.expires_ms ?? 0),
+      expiresMs: Number(result.expires_at ?? 0),
       granted: Boolean(result.granted),
     };
   }
@@ -185,8 +224,8 @@ export class PMCPRobotClient extends EventEmitter {
 
   // ── metrics ───────────────────────────────────────────────────────────────
 
-  async getMetrics(): Promise<MetricsSnapshot> {
-    const result = await this.call<Partial<MetricsSnapshot>>('pmcp/metrics', {});
+  async getMetrics(): Promise<FleetMetrics> {
+    const result = await this.call<Partial<FleetMetrics>>('pmcp/metrics', {});
     return {
       actuationCount: result.actuationCount ?? 0,
       sensorReadCount: result.sensorReadCount ?? 0,
@@ -228,7 +267,7 @@ export interface MissionStep {
 export interface MissionResult {
   missionId: string;
   success: boolean;
-  stepResults: Map<string, ActuationResult>;
+  stepResults: Map<string, ActuationOutcome>;
   totalDurationMs: number;
   failedSteps: string[];
 }
@@ -325,7 +364,7 @@ export class PMCPFleetClient extends EventEmitter {
     actuation: string,
     params: Record<string, unknown>,
     options?: { timeoutMs?: number },
-  ): Promise<ActuationResult> {
+  ): Promise<ActuationOutcome> {
     const client = this.robots.get(robotId);
     if (!client) throw new Error(`Robot ${robotId} not registered`);
     return client.actuate(actuation, params);
@@ -335,8 +374,8 @@ export class PMCPFleetClient extends EventEmitter {
     actuation: string,
     robotParams: Map<string, Record<string, unknown>>,
     options: FleetActuateOptions = {},
-  ): Promise<Map<string, ActuationResult>> {
-    const results = new Map<string, ActuationResult>();
+  ): Promise<Map<string, ActuationOutcome>> {
+    const results = new Map<string, ActuationOutcome>();
     const promises = [...robotParams.entries()].map(async ([robotId, params]) => {
       try {
         const r = await this.actuate(robotId, actuation, params, { timeoutMs: options.timeoutMs });
@@ -369,9 +408,9 @@ export class PMCPFleetClient extends EventEmitter {
   async readAllSensors(
     sensorName: string,
     robotIds?: string[],
-  ): Promise<Map<string, SensorReading>> {
+  ): Promise<Map<string, SensorSample>> {
     const targets = robotIds ?? [...this.robots.keys()];
-    const results = new Map<string, SensorReading>();
+    const results = new Map<string, SensorSample>();
 
     await Promise.allSettled(
       targets.map(async (robotId) => {
@@ -393,7 +432,7 @@ export class PMCPFleetClient extends EventEmitter {
   async runMission(steps: MissionStep[], missionId?: string): Promise<MissionResult> {
     const id = missionId ?? crypto.randomUUID().slice(0, 8);
     const start = Date.now();
-    const stepResults = new Map<string, ActuationResult>();
+    const stepResults = new Map<string, ActuationOutcome>();
     const failedSteps: string[] = [];
     const completed = new Set<string>();
     const stepMap = new Map(steps.map((s) => [s.stepId, s]));
@@ -458,8 +497,8 @@ export class PMCPFleetClient extends EventEmitter {
 
   // ── fleet metrics ─────────────────────────────────────────────────────────
 
-  async getFleetMetrics(): Promise<Map<string, MetricsSnapshot>> {
-    const results = new Map<string, MetricsSnapshot>();
+  async getFleetMetrics(): Promise<Map<string, FleetMetrics>> {
+    const results = new Map<string, FleetMetrics>();
     await Promise.allSettled(
       [...this.robots.entries()].map(async ([robotId, client]) => {
         try {
@@ -573,14 +612,14 @@ export class PMCPWebSocketClient extends EventEmitter {
     });
   }
 
-  async actuate(name: string, params: Record<string, unknown>): Promise<ActuationResult> {
+  async actuate(name: string, params: Record<string, unknown>): Promise<ActuationOutcome> {
     const result = await this.call<Record<string, unknown>>('actuations/execute', { name, params });
     return {
       success: Boolean(result.success),
       finalPose: result.final_pose as Record<string, number> | undefined,
       energyConsumedJ: Number(result.energy_consumed_j ?? 0),
-      durationMs: Number(result.duration_ms ?? 0),
-      errorMsg: result.error_msg as string | undefined,
+      durationMs: Number(result.duration_s ?? 0) * 1000,  // wire is seconds
+      errorMsg: result.error_message as string | undefined,
     };
   }
 
