@@ -1,6 +1,6 @@
 # pmcp-typescript
 
-TypeScript/Node SDK for P-MCP — the client and server surface for a
+TypeScript/Node SDK for PCP — the client and server surface for a
 Node runtime.
 
 ## Status

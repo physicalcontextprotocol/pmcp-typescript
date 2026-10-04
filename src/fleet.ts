@@ -1,5 +1,5 @@
 /**
- * P-MCP TypeScript SDK — Fleet Client
+ * PCP TypeScript SDK — Fleet Client
  * =====================================
  * High-level fleet orchestration for multi-robot deployments.
  */

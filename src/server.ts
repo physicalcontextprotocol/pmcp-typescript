@@ -1,7 +1,7 @@
 /**
- * P-MCP Server (TypeScript)
+ * PCP Server (TypeScript)
  * =========================
- * TypeScript server implementation for P-MCP
+ * TypeScript server implementation for PCP
  */
 
 import {
@@ -63,7 +63,7 @@ export interface PCPServerOptions {
 }
 
 /**
- * P-MCP Server Implementation
+ * PCP Server Implementation
  * 
  * @example
  * ```typescript
@@ -247,7 +247,7 @@ export class PCPServer {
       case 'logging/setLevel':
         return this.handleLoggingSetLevel(params);
 
-      // P-MCP Extension Methods
+      // PCP Extension Methods
       case 'shadow/preview':
         return this.handleShadowPreview(params);
       case 'lease/request':
@@ -518,7 +518,7 @@ export class PCPServer {
   }
 
   // =============================================================================
-  // P-MCP Extension Method Handlers
+  // PCP Extension Method Handlers
   // =============================================================================
 
   private handleShadowPreview(params: Record<string, unknown>): { preview: ShadowPreview } {

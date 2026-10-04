@@ -1,5 +1,5 @@
 /**
- * P-MCP TypeScript SDK
+ * PCP TypeScript SDK
  * ====================
  * Physical Context Protocol client library
  */

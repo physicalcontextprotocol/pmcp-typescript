@@ -1,7 +1,7 @@
 /**
- * P-MCP Utilities
+ * PCP Utilities
  * ===============
- * Utility functions for P-MCP client and server
+ * Utility functions for PCP client and server
  */
 
 import { PCP_VERSION } from './types';

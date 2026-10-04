@@ -1,7 +1,7 @@
 /**
- * P-MCP TypeScript SDK — Server-Side Implementation
+ * PCP TypeScript SDK — Server-Side Implementation
  * ==================================================
- * Build P-MCP robot servers in TypeScript/Node.js.
+ * Build PCP robot servers in TypeScript/Node.js.
  */
 
 import { EventEmitter } from 'eventemitter3';

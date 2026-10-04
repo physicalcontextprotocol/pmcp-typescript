@@ -1,7 +1,7 @@
 {
   "name": "physicalcontextprotocol",
   "version": "1.0.0",
-  "description": "P-MCP TypeScript SDK - Physical Context Protocol client",
+  "description": "PCP TypeScript SDK - Physical Context Protocol client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

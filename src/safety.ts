@@ -1,5 +1,5 @@
 /**
- * P-MCP TypeScript SDK — Safety Module
+ * PCP TypeScript SDK — Safety Module
  * ======================================
  * Safety constitution checking, shadow preview client, audit trail.
  */

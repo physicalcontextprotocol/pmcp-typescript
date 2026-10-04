@@ -1,7 +1,7 @@
 /**
- * P-MCP Client
+ * PCP Client
  * ============
- * Client implementation for connecting to P-MCP servers
+ * Client implementation for connecting to PCP servers
  */
 
 import {
@@ -31,9 +31,9 @@ export interface ClientOptions {
 }
 
 /**
- * P-MCP Client
+ * PCP Client
  * 
- * Connect to a P-MCP server using stdio, WebSocket, or HTTP transport.
+ * Connect to a PCP server using stdio, WebSocket, or HTTP transport.
  * 
  * @example
  * ```typescript
@@ -70,7 +70,7 @@ export class PCPServerClient {
   }
 
   /**
-   * Connect to the P-MCP server
+   * Connect to the PCP server
    */
   async connect(): Promise<void> {
     switch (this.transport) {
@@ -93,7 +93,7 @@ export class PCPServerClient {
   }
 
   /**
-   * Disconnect from the P-MCP server
+   * Disconnect from the PCP server
    */
   async disconnect(): Promise<void> {
     if (this.process) {
@@ -329,7 +329,7 @@ export class PCPServerClient {
   }
 
   // =============================================================================
-  // P-MCP Extension Methods
+  // PCP Extension Methods
   // =============================================================================
 
   /**
@@ -418,7 +418,7 @@ export class PCPServerClient {
 }
 
 /**
- * Factory function to create a P-MCP client
+ * Factory function to create a PCP client
  */
 export function createClient(options: ClientOptions): PCPServerClient {
   return new PCPServerClient(options);

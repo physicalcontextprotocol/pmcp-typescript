@@ -1,7 +1,7 @@
 /**
- * P-MCP Types
+ * PCP Types
  * ===========
- * TypeScript type definitions for P-MCP v0.5
+ * TypeScript type definitions for PCP v0.5
  */
 
 // Protocol Constants
@@ -21,7 +21,7 @@ export enum PcpErrorCode {
   InvalidParams = -32602,
   InternalError = -32603,
 
-  // P-MCP Physical Safety
+  // PCP Physical Safety
   ShadowBlocked = -33001,
   ConstitutionBlocked = -33002,
   LeaseRequired = -33003,
