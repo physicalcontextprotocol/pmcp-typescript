@@ -1,7 +1,15 @@
 # Changelog — pmcp-typescript
 
-All notable changes to the `@pmcp/client` TypeScript SDK. The format
+All notable changes to the `physicalcontextprotocol` TypeScript SDK. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased]
+
+### Changed
+- **Package renamed** from `@pmcp/client` to `physicalcontextprotocol`
+  (unscoped), matching the Python and Rust distributions.
+  `npm install physicalcontextprotocol`. Nothing was published under the old
+  name, so no alias is needed.
 
 ## [1.0.0] — 2026-09-28
 
