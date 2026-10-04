@@ -156,10 +156,11 @@ export class PMCPServerClient {
 
     return new Promise((resolve, reject) => {
       const WebSocket = require('ws');
-      this.ws = new WebSocket(this.serverUrl!);
+      const ws = new WebSocket(this.serverUrl!);
+      this.ws = ws;
 
-      this.ws.on('open', () => resolve());
-      this.ws.on('error', (err: Error) => reject(err));
+      ws.on('open', () => resolve());
+      ws.on('error', (err: Error) => reject(err));
     });
   }
 
@@ -260,7 +261,7 @@ export class PMCPServerClient {
       body: JSON.stringify(request),
     });
 
-    return response.json();
+    return (await response.json()) as JsonRpcResponse;
   }
 
   // =============================================================================

@@ -305,7 +305,7 @@ export class LRUCache<K, V> {
     } else if (this.cache.size >= this.maxSize) {
       // Remove least recently used (first item)
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey !== undefined) this.cache.delete(firstKey);
     }
     
     this.cache.set(key, value);
@@ -532,8 +532,8 @@ export function isNode(): boolean {
  * Check if running in browser
  */
 export function isBrowser(): boolean {
-  return typeof window !== 'undefined' && 
-         typeof document !== 'undefined';
+  const g = globalThis as { window?: unknown; document?: unknown };
+  return typeof g.window !== 'undefined' && typeof g.document !== 'undefined';
 }
 
 /**
