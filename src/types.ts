@@ -5,7 +5,7 @@
  */
 
 // Protocol Constants
-export const PMCP_VERSION = "0.5";
+export const PCP_VERSION = "0.5";
 export const MCP_VERSION = "2024-11-05";
 export const JSONRPC_VERSION = "2.0";
 
@@ -13,7 +13,7 @@ export const JSONRPC_VERSION = "2.0";
 // Error Codes
 // ============================================================================
 
-export enum PmcpErrorCode {
+export enum PcpErrorCode {
   // JSON-RPC 2.0 standard
   ParseError = -32700,
   InvalidRequest = -32600,
@@ -39,7 +39,7 @@ export enum PmcpErrorCode {
   RobotFault = -33015,
 }
 
-export interface PmcpError {
+export interface PcpError {
   code: number;
   message: string;
   data?: unknown;
@@ -59,7 +59,7 @@ export interface JsonRpcRequest {
 export interface JsonRpcResponse {
   jsonrpc: string;
   result?: unknown;
-  error?: PmcpError;
+  error?: PcpError;
   id?: string | number | null;
 }
 
@@ -232,7 +232,7 @@ export interface BatchActuationResult {
   duration_s?: number;
 }
 
-/** Server metrics as reported by `pmcp/metrics`. */
+/** Server metrics as reported by `pcp/metrics`. */
 export interface MetricsSnapshot {
   uptime_s: number;
   requests_total: number;
@@ -315,7 +315,7 @@ export interface InitializeResult {
   protocolVersion: string;
   capabilities: MCPCapabilities;
   serverInfo: ServerInfo;
-  pmcp: {
+  pcp: {
     version: string;
     robotId: string;
     identity: RobotIdentity;
@@ -329,7 +329,7 @@ export interface InitializeResult {
 
 export interface ServerStatus {
   robot_id: string;
-  pmcp_version: string;
+  pcp_version: string;
   uptime_s: number;
   call_count: number;
   blocked_count: number;

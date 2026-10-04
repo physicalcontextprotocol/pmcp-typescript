@@ -21,7 +21,7 @@ import {
   SensorSpec,
   ActuationResult,
   SensorReading,
-  PMCP_VERSION,
+  PCP_VERSION,
   MCP_VERSION,
 } from './types';
 
@@ -50,9 +50,9 @@ export interface ServerContext {
 }
 
 /**
- * PMCPServerOptions
+ * PCPServerOptions
  */
-export interface PMCPServerOptions {
+export interface PCPServerOptions {
   name: string;
   version?: string;
   robot_id?: string;
@@ -67,9 +67,9 @@ export interface PMCPServerOptions {
  * 
  * @example
  * ```typescript
- * import { PMCPServer } from '@pmcp/server';
+ * import { PCPServer } from '@pcp/server';
  * 
- * const server = new PMCPServer({
+ * const server = new PCPServer({
  *   name: 'ur5-arm',
  *   robot_id: 'ur5-001',
  *   robot_class: 'arm',
@@ -105,7 +105,7 @@ export interface PMCPServerOptions {
  * await server.run();
  * ```
  */
-export class PMCPServer {
+export class PCPServer {
   private name: string;
   private version: string;
   private robot_id: string;
@@ -127,7 +127,7 @@ export class PMCPServer {
   private blockedCount = 0;
   private startedAt = Date.now();
 
-  constructor(options: PMCPServerOptions) {
+  constructor(options: PCPServerOptions) {
     this.name = options.name;
     this.version = options.version || '1.0.0';
     this.robot_id = options.robot_id || options.name;
@@ -254,13 +254,13 @@ export class PMCPServer {
         return this.handleLeaseRequest(params);
       case 'lease/release':
         return this.handleLeaseRelease(params);
-      case 'pmcp/estop':
+      case 'pcp/estop':
         return this.handleEstop(params);
-      case 'pmcp/status':
+      case 'pcp/status':
         return this.handleStatus(params);
-      case 'pmcp/identity':
+      case 'pcp/identity':
         return this.handleIdentity(params);
-      case 'pmcp/constitution':
+      case 'pcp/constitution':
         return this.handleConstitution(params);
 
       default:
@@ -272,7 +272,7 @@ export class PMCPServer {
    * Handle notifications (fire-and-forget)
    */
   private async handleNotification(method: string, params: Record<string, unknown>): Promise<void> {
-    if (method === 'pmcp/estop') {
+    if (method === 'pcp/estop') {
       const active = params.active as boolean ?? true;
       this.safetyMiddleware.setEstop(active);
     }
@@ -298,8 +298,8 @@ export class PMCPServer {
         prompts: { listChanged: false },
         logging: {},
         experimental: {
-          pmcp: {
-            version: PMCP_VERSION,
+          pcp: {
+            version: PCP_VERSION,
             shadow: true,
             leases: true,
             estop: true,
@@ -311,11 +311,11 @@ export class PMCPServer {
         name: this.name,
         version: this.version,
       },
-      pmcp: {
-        version: PMCP_VERSION,
+      pcp: {
+        version: PCP_VERSION,
         robotId: this.robot_id,
         identity: {
-          did: `did:pmcp:${this.robot_class}:${this.model.toLowerCase()}:${this.location}:${this.serial}`,
+          did: `did:pcp:${this.robot_class}:${this.model.toLowerCase()}:${this.location}:${this.serial}`,
           robot_class: this.robot_class,
           model: this.model,
           serial: this.serial,
@@ -367,7 +367,7 @@ export class PMCPServer {
           category: spec.category || 'motion',
           max_speed_m_s: spec.max_speed_m_s || 1.0,
           shadow_required: spec.shadow_required !== false,
-          protocol: 'pmcp/0.5',
+          protocol: 'pcp/0.5',
         },
       });
     }
@@ -444,7 +444,7 @@ export class PMCPServer {
 
     for (const [name, spec] of this.sensors) {
       resources.push({
-        uri: `pmcp://${this.robot_id}/sensors/${name}`,
+        uri: `pcp://${this.robot_id}/sensors/${name}`,
         name: spec.name,
         description: spec.description,
         mimeType: 'application/json',
@@ -453,7 +453,7 @@ export class PMCPServer {
           sensor_type: spec.sensor_type,
           unit: spec.unit || '',
           hz: spec.hz || 10,
-          protocol: 'pmcp/0.5',
+          protocol: 'pcp/0.5',
         },
       });
     }
@@ -561,7 +561,7 @@ export class PMCPServer {
   private handleStatus(_params: Record<string, unknown>): ServerStatus {
     return {
       robot_id: this.robot_id,
-      pmcp_version: PMCP_VERSION,
+      pcp_version: PCP_VERSION,
       uptime_s: (Date.now() - this.startedAt) / 1000,
       call_count: this.callCount,
       blocked_count: this.blockedCount,
@@ -574,7 +574,7 @@ export class PMCPServer {
 
   private handleIdentity(_params: Record<string, unknown>): RobotIdentity {
     return {
-      did: `did:pmcp:${this.robot_class}:${this.model.toLowerCase()}:${this.location}:${this.serial}`,
+      did: `did:pcp:${this.robot_class}:${this.model.toLowerCase()}:${this.location}:${this.serial}`,
       robot_class: this.robot_class,
       model: this.model,
       serial: this.serial,

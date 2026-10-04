@@ -8,9 +8,9 @@ import { EventEmitter } from 'eventemitter3';
 import {
   JsonRpcRequest,
   JsonRpcResponse,
-  PmcpError,
-  PmcpErrorCode,
-  PMCP_VERSION,
+  PcpError,
+  PcpErrorCode,
+  PCP_VERSION,
 } from './types';
 
 // ── Normalized client-side DTOs ─────────────────────────────────────────────
@@ -86,7 +86,7 @@ export interface RobotStatus {
 // Single Robot Client
 // ============================================================================
 
-export class PMCPRobotClient extends EventEmitter {
+export class PCPRobotClient extends EventEmitter {
   private readonly config: Required<RobotEndpointConfig>;
   private reqCounter = 0;
 
@@ -127,7 +127,7 @@ export class PMCPRobotClient extends EventEmitter {
       headers['Authorization'] = `Bearer ${this.config.bearerToken}`;
     }
     if (this.config.did) {
-      headers['X-PMCP-DID'] = this.config.did;
+      headers['X-PCP-DID'] = this.config.did;
     }
 
     const controller = new AbortController();
@@ -148,7 +148,7 @@ export class PMCPRobotClient extends EventEmitter {
       const body = await response.json() as JsonRpcResponse;
 
       if (body.error) {
-        const err = new PMCPClientError(body.error.message, body.error.code);
+        const err = new PCPClientError(body.error.message, body.error.code);
         this.emit('error', err);
         throw err;
       }
@@ -163,8 +163,8 @@ export class PMCPRobotClient extends EventEmitter {
 
   async initialize(): Promise<Record<string, unknown>> {
     return this.call('initialize', {
-      protocolVersion: PMCP_VERSION,
-      clientInfo: { name: 'pmcp-ts-client', version: '1.0.0' },
+      protocolVersion: PCP_VERSION,
+      clientInfo: { name: 'pcp-ts-client', version: '1.0.0' },
     });
   }
 
@@ -225,7 +225,7 @@ export class PMCPRobotClient extends EventEmitter {
   // ── metrics ───────────────────────────────────────────────────────────────
 
   async getMetrics(): Promise<FleetMetrics> {
-    const result = await this.call<Partial<FleetMetrics>>('pmcp/metrics', {});
+    const result = await this.call<Partial<FleetMetrics>>('pcp/metrics', {});
     return {
       actuationCount: result.actuationCount ?? 0,
       sensorReadCount: result.sensorReadCount ?? 0,
@@ -240,7 +240,7 @@ export class PMCPRobotClient extends EventEmitter {
 
   async ping(): Promise<number> {
     const start = performance.now();
-    await this.call('pmcp/ping', {});
+    await this.call('pcp/ping', {});
     return performance.now() - start;
   }
 }
@@ -272,15 +272,15 @@ export interface MissionResult {
   failedSteps: string[];
 }
 
-export class PMCPFleetClient extends EventEmitter {
-  private readonly robots = new Map<string, PMCPRobotClient>();
+export class PCPFleetClient extends EventEmitter {
+  private readonly robots = new Map<string, PCPRobotClient>();
   private readonly status = new Map<string, RobotStatus>();
   private healthInterval?: NodeJS.Timeout;
 
   // ── robot management ─────────────────────────────────────────────────────
 
   async addRobot(config: RobotEndpointConfig, probe = true): Promise<RobotStatus> {
-    const client = new PMCPRobotClient(config);
+    const client = new PCPRobotClient(config);
     this.robots.set(config.robotId, client);
 
     const s: RobotStatus = {
@@ -306,7 +306,7 @@ export class PMCPFleetClient extends EventEmitter {
     this.status.delete(robotId);
   }
 
-  getClient(robotId: string): PMCPRobotClient | undefined {
+  getClient(robotId: string): PCPRobotClient | undefined {
     return this.robots.get(robotId);
   }
 
@@ -521,7 +521,7 @@ export class PMCPFleetClient extends EventEmitter {
 // WebSocket Client
 // ============================================================================
 
-export class PMCPWebSocketClient extends EventEmitter {
+export class PCPWebSocketClient extends EventEmitter {
   private ws?: WebSocket;
   private reqCounter = 0;
   private pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
@@ -564,7 +564,7 @@ export class PMCPWebSocketClient extends EventEmitter {
           if (pending) {
             this.pending.delete(msg.id as number);
             if (msg.error) {
-              pending.reject(new PMCPClientError(msg.error.message, msg.error.code));
+              pending.reject(new PCPClientError(msg.error.message, msg.error.code));
             } else {
               pending.resolve(msg.result);
             }
@@ -640,27 +640,27 @@ export class PMCPWebSocketClient extends EventEmitter {
 // Error Types
 // ============================================================================
 
-export class PMCPClientError extends Error {
+export class PCPClientError extends Error {
   constructor(
     message: string,
     public readonly code: number,
   ) {
     super(message);
-    this.name = 'PMCPClientError';
+    this.name = 'PCPClientError';
   }
 
-  get isPmcpError(): boolean {
+  get isPcpError(): boolean {
     return this.code >= -33999 && this.code <= -33000;
   }
 
   get isSafetyError(): boolean {
     return [
-      PmcpErrorCode.ShadowBlocked,
-      PmcpErrorCode.ConstitutionBlocked,
-      PmcpErrorCode.EstopActive,
-      PmcpErrorCode.CollisionDetected,
-      PmcpErrorCode.HumanProximity,
-    ].includes(this.code as PmcpErrorCode);
+      PcpErrorCode.ShadowBlocked,
+      PcpErrorCode.ConstitutionBlocked,
+      PcpErrorCode.EstopActive,
+      PcpErrorCode.CollisionDetected,
+      PcpErrorCode.HumanProximity,
+    ].includes(this.code as PcpErrorCode);
   }
 }
 
@@ -668,12 +668,12 @@ export class PMCPClientError extends Error {
 // Convenience Factory
 // ============================================================================
 
-export function createFleetClient(): PMCPFleetClient {
-  return new PMCPFleetClient();
+export function createFleetClient(): PCPFleetClient {
+  return new PCPFleetClient();
 }
 
-export async function connectRobot(config: RobotEndpointConfig): Promise<PMCPRobotClient> {
-  const client = new PMCPRobotClient(config);
+export async function connectRobot(config: RobotEndpointConfig): Promise<PCPRobotClient> {
+  const client = new PCPRobotClient(config);
   await client.initialize();
   return client;
 }

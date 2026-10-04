@@ -15,11 +15,11 @@ import {
   JsonRpcResponse,
   LeaseGrant,
   MetricsSnapshot,
-  PmcpErrorCode,
+  PcpErrorCode,
   SensorReading,
   SensorSpec,
   SensorType,
-  PMCP_VERSION,
+  PCP_VERSION,
 } from './types';
 
 // ============================================================================
@@ -54,7 +54,7 @@ export interface SafetyMiddleware {
     actuationName: string,
     params: Record<string, unknown>,
     context: RequestContext,
-  ): Promise<{ allowed: boolean; reason?: string; code?: PmcpErrorCode }>;
+  ): Promise<{ allowed: boolean; reason?: string; code?: PcpErrorCode }>;
 }
 
 export class RateLimitMiddleware implements SafetyMiddleware {
@@ -72,7 +72,7 @@ export class RateLimitMiddleware implements SafetyMiddleware {
     actuationName: string,
     _params: Record<string, unknown>,
     context: RequestContext,
-  ): Promise<{ allowed: boolean; reason?: string; code?: PmcpErrorCode }> {
+  ): Promise<{ allowed: boolean; reason?: string; code?: PcpErrorCode }> {
     const key = `${context.robotId}:${actuationName}`;
     const now = Date.now();
     const bucket = this.buckets.get(key) ?? { tokens: this.burst, lastRefill: now };
@@ -86,7 +86,7 @@ export class RateLimitMiddleware implements SafetyMiddleware {
       bucket.tokens -= 1;
       return { allowed: true };
     }
-    return { allowed: false, reason: 'Rate limit exceeded', code: PmcpErrorCode.InternalError };
+    return { allowed: false, reason: 'Rate limit exceeded', code: PcpErrorCode.InternalError };
   }
 }
 
@@ -98,9 +98,9 @@ export class EstopMiddleware implements SafetyMiddleware {
   disengage(): void { this.stopped = false; }
   isEngaged(): boolean { return this.stopped; }
 
-  async check(): Promise<{ allowed: boolean; reason?: string; code?: PmcpErrorCode }> {
+  async check(): Promise<{ allowed: boolean; reason?: string; code?: PcpErrorCode }> {
     if (this.stopped) {
-      return { allowed: false, reason: 'Emergency stop is active', code: PmcpErrorCode.EstopActive };
+      return { allowed: false, reason: 'Emergency stop is active', code: PcpErrorCode.EstopActive };
     }
     return { allowed: true };
   }
@@ -173,7 +173,7 @@ export class LeaseManager {
     );
   }
 
-  /** Leases granted and not yet expired. Used by the `pmcp/metrics` handler. */
+  /** Leases granted and not yet expired. Used by the `pcp/metrics` handler. */
   activeCount(now: number = Date.now()): number {
     let n = 0;
     for (const lease of this.leases.values()) {
@@ -193,10 +193,10 @@ export class LeaseManager {
 }
 
 // ============================================================================
-// PMCPServer
+// PCPServer
 // ============================================================================
 
-export interface PMCPServerOptions {
+export interface PCPServerOptions {
   name: string;
   version?: string;
   robotId?: string;
@@ -243,8 +243,8 @@ interface AuditEntry {
   errorMessage?: string;
 }
 
-export class PMCPServer extends EventEmitter {
-  private readonly opts: Required<PMCPServerOptions>;
+export class PCPServer extends EventEmitter {
+  private readonly opts: Required<PCPServerOptions>;
   private readonly actuationHandlers = new Map<string, ActuationHandler>();
   private readonly actuationSpecs = new Map<string, ActuationSpec>();
   private readonly sensorHandlers = new Map<string, SensorHandler>();
@@ -264,7 +264,7 @@ export class PMCPServer extends EventEmitter {
   private startTime = Date.now();
   private auditLog: AuditEntry[] = [];
 
-  constructor(options: PMCPServerOptions) {
+  constructor(options: PCPServerOptions) {
     super();
     this.opts = {
       version: '1.0.0',
@@ -378,10 +378,10 @@ export class PMCPServer extends EventEmitter {
         case 'leases/release':
           result = { released: this.leaseManager.release(String(p.lease_id ?? '')) };
           break;
-        case 'pmcp/metrics':
+        case 'pcp/metrics':
           result = this.getMetrics();
           break;
-        case 'pmcp/ping':
+        case 'pcp/ping':
           result = { pong: true, timestamp: Date.now() };
           break;
         case 'safety/estop/engage':
@@ -402,14 +402,14 @@ export class PMCPServer extends EventEmitter {
         default:
           return {
             jsonrpc: '2.0',
-            error: { code: PmcpErrorCode.MethodNotFound, message: `Method not found: ${method}` },
+            error: { code: PcpErrorCode.MethodNotFound, message: `Method not found: ${method}` },
             id: id ?? null,
           };
       }
 
       return { jsonrpc: '2.0', result, id: id ?? null };
     } catch (err) {
-      const code = (err as { code?: number }).code ?? PmcpErrorCode.InternalError;
+      const code = (err as { code?: number }).code ?? PcpErrorCode.InternalError;
       const message = String((err as Error).message ?? err);
       this.auditEvent('error', { method, errorCode: code, errorMessage: message });
       return {
@@ -422,7 +422,7 @@ export class PMCPServer extends EventEmitter {
 
   private handleInitialize(params: Record<string, unknown>): Record<string, unknown> {
     return {
-      protocolVersion: PMCP_VERSION,
+      protocolVersion: PCP_VERSION,
       serverInfo: {
         name: this.opts.name,
         version: this.opts.version,
@@ -456,7 +456,7 @@ export class PMCPServer extends EventEmitter {
 
     const handler = this.actuationHandlers.get(name);
     if (!handler) {
-      throw { code: PmcpErrorCode.MethodNotFound, message: `Actuation not found: ${name}` };
+      throw { code: PcpErrorCode.MethodNotFound, message: `Actuation not found: ${name}` };
     }
 
     // Run middleware checks
@@ -465,7 +465,7 @@ export class PMCPServer extends EventEmitter {
       if (!result.allowed) {
         this.safetyViolations++;
         this.auditEvent('safety_violation', { actuation: name, middleware: mw.name, reason: result.reason });
-        throw { code: result.code ?? PmcpErrorCode.InternalError, message: result.reason ?? 'Blocked by safety middleware' };
+        throw { code: result.code ?? PcpErrorCode.InternalError, message: result.reason ?? 'Blocked by safety middleware' };
       }
     }
 
@@ -524,7 +524,7 @@ export class PMCPServer extends EventEmitter {
     const name = String(params.name ?? '');
     const handler = this.sensorHandlers.get(name);
     if (!handler) {
-      throw { code: PmcpErrorCode.MethodNotFound, message: `Sensor not found: ${name}` };
+      throw { code: PcpErrorCode.MethodNotFound, message: `Sensor not found: ${name}` };
     }
     this.sensorReadCount++;
     return handler(context);
@@ -602,7 +602,7 @@ export class PMCPServer extends EventEmitter {
       const context: RequestContext = {
         requestId: body.id ?? 0,
         robotId: this.opts.robotId,
-        clientDid: req.headers['x-pmcp-did'] as string | undefined,
+        clientDid: req.headers['x-pcp-did'] as string | undefined,
         bearerToken: req.headers.authorization?.replace('Bearer ', ''),
         timestamp: Date.now(),
       };
@@ -611,7 +611,7 @@ export class PMCPServer extends EventEmitter {
 
       res.writeHead(200, {
         'Content-Type': 'application/json',
-        'X-PMCP-Version': PMCP_VERSION,
+        'X-PCP-Version': PCP_VERSION,
       });
       res.end(JSON.stringify(response));
     };

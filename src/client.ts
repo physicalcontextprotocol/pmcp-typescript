@@ -17,8 +17,8 @@ import {
   RobotIdentity,
   Capabilities,
   SafetyConstitution,
-  PmcpError,
-  PmcpErrorCode,
+  PcpError,
+  PcpErrorCode,
 } from './types';
 
 export type TransportType = 'stdio' | 'websocket' | 'http';
@@ -37,9 +37,9 @@ export interface ClientOptions {
  * 
  * @example
  * ```typescript
- * import { PMCPServerClient } from 'physicalcontextprotocol';
+ * import { PCPServerClient } from 'physicalcontextprotocol';
  * 
- * const client = new PMCPServerClient({
+ * const client = new PCPServerClient({
  *   transport: 'stdio',
  *   serverCommand: ['python', 'arm_server.py'],
  * });
@@ -50,7 +50,7 @@ export interface ClientOptions {
  * await client.disconnect();
  * ```
  */
-export class PMCPServerClient {
+export class PCPServerClient {
   private transport: TransportType;
   private serverCommand?: string[];
   private serverUrl?: string;
@@ -66,7 +66,7 @@ export class PMCPServerClient {
     this.transport = options.transport;
     this.serverCommand = options.serverCommand;
     this.serverUrl = options.serverUrl;
-    this.clientInfo = options.clientInfo || { name: 'pmcp-typescript-client', version: '1.0.0' };
+    this.clientInfo = options.clientInfo || { name: 'pcp-typescript-client', version: '1.0.0' };
   }
 
   /**
@@ -255,7 +255,7 @@ export class PMCPServerClient {
    * Send request via HTTP
    */
   private async sendRequestHttp(request: JsonRpcRequest): Promise<JsonRpcResponse> {
-    const response = await fetch(`${this.serverUrl}/pmcp`, {
+    const response = await fetch(`${this.serverUrl}/pcp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
@@ -336,21 +336,21 @@ export class PMCPServerClient {
    * Get server status
    */
   async getStatus(): Promise<ServerStatus> {
-    return this.sendRequest('pmcp/status');
+    return this.sendRequest('pcp/status');
   }
 
   /**
    * Get robot identity
    */
   async getIdentity(): Promise<RobotIdentity> {
-    return this.sendRequest('pmcp/identity');
+    return this.sendRequest('pcp/identity');
   }
 
   /**
    * Get safety constitution
    */
   async getConstitution(): Promise<SafetyConstitution> {
-    return this.sendRequest('pmcp/constitution');
+    return this.sendRequest('pcp/constitution');
   }
 
   /**
@@ -385,7 +385,7 @@ export class PMCPServerClient {
    * Activate/deactivate emergency stop
    */
   async setEstop(active: boolean): Promise<{ estop: boolean; ts: number }> {
-    return this.sendRequest('pmcp/estop', { active });
+    return this.sendRequest('pcp/estop', { active });
   }
 
   /**
@@ -420,15 +420,15 @@ export class PMCPServerClient {
 /**
  * Factory function to create a P-MCP client
  */
-export function createClient(options: ClientOptions): PMCPServerClient {
-  return new PMCPServerClient(options);
+export function createClient(options: ClientOptions): PCPServerClient {
+  return new PCPServerClient(options);
 }
 
 /**
  * Convenience function to create a stdio client
  */
-export function createStdioClient(serverCommand: string[]): PMCPServerClient {
-  return new PMCPServerClient({
+export function createStdioClient(serverCommand: string[]): PCPServerClient {
+  return new PCPServerClient({
     transport: 'stdio',
     serverCommand,
   });
@@ -437,8 +437,8 @@ export function createStdioClient(serverCommand: string[]): PMCPServerClient {
 /**
  * Convenience function to create an HTTP client
  */
-export function createHttpClient(serverUrl: string): PMCPServerClient {
-  return new PMCPServerClient({
+export function createHttpClient(serverUrl: string): PCPServerClient {
+  return new PCPServerClient({
     transport: 'http',
     serverUrl,
   });
@@ -447,8 +447,8 @@ export function createHttpClient(serverUrl: string): PMCPServerClient {
 /**
  * Convenience function to create a WebSocket client
  */
-export function createWebSocketClient(serverUrl: string): PMCPServerClient {
-  return new PMCPServerClient({
+export function createWebSocketClient(serverUrl: string): PCPServerClient {
+  return new PCPServerClient({
     transport: 'websocket',
     serverUrl,
   });

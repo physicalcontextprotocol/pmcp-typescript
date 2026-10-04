@@ -4,7 +4,7 @@
  * Utility functions for P-MCP client and server
  */
 
-import { PMCP_VERSION } from './types';
+import { PCP_VERSION } from './types';
 
 /**
  * Generate a unique ID
@@ -549,4 +549,4 @@ export function getEnv(name: string, defaultValue = ''): string {
 /**
  * Version info
  */
-export const version = PMCP_VERSION;
+export const version = PCP_VERSION;

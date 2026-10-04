@@ -1,7 +1,7 @@
 {
   "name": "physicalcontextprotocol",
   "version": "1.0.0",
-  "description": "P-MCP TypeScript SDK - Physical Model Context Protocol client",
+  "description": "P-MCP TypeScript SDK - Physical Context Protocol client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -17,7 +17,7 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "pmcp",
+    "pcp",
     "robotics",
     "mcp",
     "model-context-protocol",

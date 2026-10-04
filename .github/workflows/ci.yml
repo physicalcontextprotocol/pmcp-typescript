@@ -6,7 +6,7 @@ name: pmcp-typescript CI
 # `npm run build` fails with 32 TypeScript errors. Those are enumerated in
 # `CHANGELOG.md` and `CONTRIBUTING.md`, and the biggest cluster is not a
 # typo — it is that `src/server.ts` and `src/server_impl.ts` are two
-# competing PMCPServer implementations that `src/index.ts` re-exports
+# competing PCPServer implementations that `src/index.ts` re-exports
 # simultaneously, producing four TS2308 ambiguity errors. Picking a
 # canonical one is an architecture decision, not a lint fix, so it is not
 # made silently here.
@@ -57,7 +57,7 @@ jobs:
   # same PR that fixes them.
   #
   # This baseline was 19, and that made the job fail on every run, because
-  # 32 > 19. The 19 is pmcp-ledger's error count -- a Rust number that had
+  # 32 > 19. The 19 is pcp-ledger's error count -- a Rust number that had
   # been copied into this TypeScript workflow, presumably because both
   # "fail to compile" and "19" were already in circulation. The effect was
   # that pmcp-typescript could never go green, and the release gate would

@@ -6,7 +6,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- **Package renamed** from `@pmcp/client` to `physicalcontextprotocol`
+- **Package renamed** from `@pcp/client` to `physicalcontextprotocol`
   (unscoped), matching the Python and Rust distributions.
   `npm install physicalcontextprotocol`. Nothing was published under the old
   name, so no alias is needed.
@@ -41,7 +41,7 @@ finished — it is a skeleton, and the changelog says so.**
 
   | Count | Error | Nature |
   |---|---|---|
-  | 4 | `TS2308` ambiguity on `ActuationHandler`, `PMCPServer`, `PMCPServerOptions`, `SensorHandler` at `src/index.ts:11` | **architecture**, see below |
+  | 4 | `TS2308` ambiguity on `ActuationHandler`, `PCPServer`, `PCPServerOptions`, `SensorHandler` at `src/index.ts:11` | **architecture**, see below |
   | 6 | `TS2561`/`TS2353` — `leaseId`, `robotId`, `sensorType`, `energyConsumedJ`, `bid_energy_j` used where the type declares `lease_id`, `robot_id`, `sensor_type`, `energy_consumed_j` | camelCase/snake_case drift |
   | 2 | `TS2305` — `ConstitutionCheck` and `MetricsSnapshot` imported from `./types`, which does not export them | missing types |
   | 1 | `TS2693` — `SensorType` used as a value, but it is declared as a `type` union rather than an enum | needs a runtime representation |
@@ -51,8 +51,8 @@ finished — it is a skeleton, and the changelog says so.**
 
   **The 4 `TS2308` errors are the interesting ones, and they are not a
   typo.** `src/index.ts` re-exports *both* `./server` and
-  `./server_impl`, and each of them exports its own `PMCPServer`,
-  `ActuationHandler`, `SensorHandler`, and `PMCPServerOptions`. This is
+  `./server_impl`, and each of them exports its own `PCPServer`,
+  `ActuationHandler`, `SensorHandler`, and `PCPServerOptions`. This is
   the same duplicate-implementation problem the Python SDK has, and
   resolving it means deciding which server is canonical — an
   architecture decision, deliberately not made silently here.

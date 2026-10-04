@@ -5,7 +5,7 @@
  */
 
 import {
-  PmcpErrorCode,
+  PcpErrorCode,
   ShadowPreview,
 } from './types';
 
@@ -97,7 +97,7 @@ export interface ConstitutionRule {
   field: string;
   operator: ConstitutionOperator;
   value?: unknown;
-  errorCode?: PmcpErrorCode;
+  errorCode?: PcpErrorCode;
   blocking: boolean;
   message?: string;
 }
@@ -110,7 +110,7 @@ export interface ConstitutionCheckResult {
     field: string;
     actual: unknown;
     message: string;
-    errorCode: PmcpErrorCode;
+    errorCode: PcpErrorCode;
     blocking: boolean;
   }>;
   warnings: string[];
@@ -158,7 +158,7 @@ export class ConstitutionEngine {
           field: rule.field,
           actual,
           message: msg,
-          errorCode: rule.errorCode ?? PmcpErrorCode.ConstitutionBlocked,
+          errorCode: rule.errorCode ?? PcpErrorCode.ConstitutionBlocked,
           blocking: rule.blocking,
         });
 
@@ -335,7 +335,7 @@ export class SafetyMonitor {
         field: 'speed_m_s',
         operator: 'lte',
         value: config.maxSpeedMs,
-        errorCode: PmcpErrorCode.SpeedLimit,
+        errorCode: PcpErrorCode.SpeedLimit,
         blocking: true,
         message: `Speed must be ≤ ${config.maxSpeedMs} m/s`,
       });
@@ -348,7 +348,7 @@ export class SafetyMonitor {
         field: 'force_n',
         operator: 'lte',
         value: config.maxForceN,
-        errorCode: PmcpErrorCode.TorqueLimit,
+        errorCode: PcpErrorCode.TorqueLimit,
         blocking: true,
         message: `Force must be ≤ ${config.maxForceN} N`,
       });
@@ -360,21 +360,21 @@ export class SafetyMonitor {
         this.engine.addRule({
           id: 'ws_x_min', name: 'Workspace X Min',
           field: 'target.x', operator: 'gte', value: ws.xMin,
-          errorCode: PmcpErrorCode.WorkspaceViolation, blocking: true,
+          errorCode: PcpErrorCode.WorkspaceViolation, blocking: true,
         });
       }
       if (ws.xMax !== undefined) {
         this.engine.addRule({
           id: 'ws_x_max', name: 'Workspace X Max',
           field: 'target.x', operator: 'lte', value: ws.xMax,
-          errorCode: PmcpErrorCode.WorkspaceViolation, blocking: true,
+          errorCode: PcpErrorCode.WorkspaceViolation, blocking: true,
         });
       }
       if (ws.zMin !== undefined) {
         this.engine.addRule({
           id: 'ws_z_min', name: 'Floor Guard',
           field: 'target.z', operator: 'gte', value: ws.zMin,
-          errorCode: PmcpErrorCode.FloorGuard, blocking: true,
+          errorCode: PcpErrorCode.FloorGuard, blocking: true,
         });
       }
     }
@@ -384,7 +384,7 @@ export class SafetyMonitor {
     actuationName: string,
     params: Record<string, unknown>,
     robotId: string,
-  ): Promise<{ allowed: boolean; violations: string[]; errorCode?: PmcpErrorCode }> {
+  ): Promise<{ allowed: boolean; violations: string[]; errorCode?: PcpErrorCode }> {
     // E-stop takes priority
     if (this.estopEngaged) {
       await this.audit.record({
@@ -394,7 +394,7 @@ export class SafetyMonitor {
       return {
         allowed: false,
         violations: ['Emergency stop is engaged'],
-        errorCode: PmcpErrorCode.EstopActive,
+        errorCode: PcpErrorCode.EstopActive,
       };
     }
 
@@ -411,7 +411,7 @@ export class SafetyMonitor {
       return {
         allowed: false,
         violations: constitutionResult.violations.map((v) => v.message),
-        errorCode: firstBlocking?.errorCode ?? PmcpErrorCode.ConstitutionBlocked,
+        errorCode: firstBlocking?.errorCode ?? PcpErrorCode.ConstitutionBlocked,
       };
     }
 

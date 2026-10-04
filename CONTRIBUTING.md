@@ -30,9 +30,9 @@ Two clusters need judgement rather than a mechanical fix:
 
 **1. Four `TS2308` errors mean there are two servers.** `src/index.ts`
 re-exports both `./server` and `./server_impl`, and both export a
-`PMCPServer`, `ActuationHandler`, `SensorHandler`, and
-`PMCPServerOptions`. This is the same duplicate-implementation shape as
-the Python SDK's `pmcp/` / `sdk/` / `v05/`. **Resolving it means
+`PCPServer`, `ActuationHandler`, `SensorHandler`, and
+`PCPServerOptions`. This is the same duplicate-implementation shape as
+the Python SDK's `pcp/` / `sdk/` / `v05/`. **Resolving it means
 deciding which server is canonical.** That is the highest-value change
 in this repository, and it is an architecture decision, so it is not
 made by a drive-by type fix. If you take it on, say which one you picked
