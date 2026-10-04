@@ -16,7 +16,7 @@ Node runtime.
 - `utils.ts` — helpers
 - `index.ts` — barrel re-exports
 
-`package.json` names the package `@pmcp/client@0.5.0`. All runtime
+`package.json` names the package `physicalcontextprotocol@1.0.0`. All runtime
 dependencies (`ws`, `eventemitter3`, `uuid`) are actually imported.
 
 ## Build

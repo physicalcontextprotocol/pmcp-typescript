@@ -37,7 +37,7 @@ export interface ClientOptions {
  * 
  * @example
  * ```typescript
- * import { PMCPServerClient } from '@pmcp/client';
+ * import { PMCPServerClient } from 'physicalcontextprotocol';
  * 
  * const client = new PMCPServerClient({
  *   transport: 'stdio',

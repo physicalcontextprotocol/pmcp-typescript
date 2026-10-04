@@ -1,5 +1,5 @@
 {
-  "name": "@pmcp/client",
+  "name": "physicalcontextprotocol",
   "version": "1.0.0",
   "description": "P-MCP TypeScript SDK - Physical Model Context Protocol client",
   "main": "dist/index.js",

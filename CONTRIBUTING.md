@@ -1,6 +1,6 @@
 # Contributing to pmcp-typescript
 
-The TypeScript/Node SDK — `@pmcp/client`.
+The TypeScript/Node SDK — `physicalcontextprotocol`.
 
 The organization-wide contributor policy lives in
 [`physicalcontextprotocol/.github`](https://github.com/physicalcontextprotocol/.github/blob/main/CONTRIBUTING.md).
