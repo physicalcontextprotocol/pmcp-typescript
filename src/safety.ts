@@ -7,7 +7,6 @@
 import {
   PmcpErrorCode,
   ShadowPreview,
-  ConstitutionCheck,
 } from './types';
 
 // ============================================================================
