@@ -16,10 +16,25 @@ Node runtime.
 - `utils.ts` — helpers
 - `index.ts` — barrel re-exports
 
-`package.json` names the package `physicalcontextprotocol@1.0.0`. All runtime
+Published to npm as `@physicalcontextprotocol/sdk@1.0.0`. All runtime
 dependencies (`ws`, `eventemitter3`, `uuid`) are actually imported.
 
-## Build
+## Install
+
+```bash
+npm install @physicalcontextprotocol/sdk
+```
+
+```ts
+import { createClient, createStdioClient } from '@physicalcontextprotocol/sdk';
+```
+
+Client entry points are `createClient` (generic), `createStdioClient`,
+`createHttpClient`, `createWebSocketClient`, and `createFleetClient`, plus
+the `PCPRobotClient` / `PCPFleetClient` / `PCPServerClient` /
+`PCPWebSocketClient` classes. There is no export named `PCPClient`.
+
+## Build from source
 
 ```bash
 npm install

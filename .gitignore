@@ -57,3 +57,6 @@ secrets.*
 bandit-report.json
 pip-audit-report.*
 *.log
+
+# npm pack artifacts
+*.tgz

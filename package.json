@@ -28,7 +28,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/physicalcontextprotocol/pmcp-typescript.git",
+    "url": "git+https://github.com/physicalcontextprotocol/pmcp-typescript.git",
     "directory": "pmcp-typescript"
   },
   "homepage": "https://github.com/physicalcontextprotocol/pmcp-typescript",
