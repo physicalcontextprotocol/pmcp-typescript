@@ -1,5 +1,5 @@
 {
-  "name": "physicalcontextprotocol",
+  "name": "@physicalcontextprotocol/sdk",
   "version": "1.0.0",
   "description": "PCP TypeScript SDK - Physical Context Protocol client",
   "main": "dist/index.js",
@@ -36,20 +36,20 @@
     "url": "https://github.com/physicalcontextprotocol/pmcp-typescript/issues"
   },
   "dependencies": {
-    "ws": "^8.14.0",
     "eventemitter3": "^5.0.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "ws": "^8.14.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.10",
     "@types/node": "^20.10.0",
     "@types/ws": "^8.5.10",
-    "typescript": "^5.3.0",
-    "jest": "^29.7.0",
-    "@types/jest": "^29.5.10",
-    "ts-jest": "^29.1.1",
-    "eslint": "^8.55.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
-    "@typescript-eslint/parser": "^6.13.0"
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.0"
   },
   "engines": {
     "node": ">=18.0.0"
