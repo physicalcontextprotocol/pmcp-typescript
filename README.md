@@ -16,7 +16,7 @@ Node runtime.
 - `utils.ts` — helpers
 - `index.ts` — barrel re-exports
 
-Published to npm as `@physicalcontextprotocol/sdk@1.0.0`. All runtime
+Published to npm as `@physicalcontextprotocol/sdk`. All runtime
 dependencies (`ws`, `eventemitter3`, `uuid`) are actually imported.
 
 ## Install
