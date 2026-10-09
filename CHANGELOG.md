@@ -11,6 +11,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `npm install physicalcontextprotocol`. Nothing was published under the old
   name, so no alias is needed.
 
+## [1.0.1] — 2026-10-05
+
+### Fixed
+
+- **README named the wrong install command and pinned a version.** 1.0.0
+  shipped a README that told consumers to run a bare `npm install` and
+  named the package as `physicalcontextprotocol@1.0.0`, neither of which
+  matches the published artifact. npm tarballs are immutable, so the text
+  can only be corrected by a new version. The version is now dropped from
+  the package-name sentence entirely — the registry is the source of truth
+  for the current version, and restating it there is what made the shipped
+  text go stale. Install instructions now name the registry package and the
+  actual client entry points, with a note that there is no `PCPClient`
+  export.
+
 ## [1.0.0] — 2026-09-28
 
 First tagged public release. **Read this before assuming the SDK is
