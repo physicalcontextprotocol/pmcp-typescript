@@ -1,7 +1,7 @@
-# Security policy — pmcp-typescript
+# Security policy — pcp-typescript
 
 The default policy for this organization lives in
-[`pmcp-spec/SECURITY.md`](https://github.com/physicalcontextprotocol/pmcp-spec/blob/main/SECURITY.md)
+[`pcp-spec/SECURITY.md`](https://github.com/physicalcontextprotocol/pcp-spec/blob/main/SECURITY.md)
 and applies here in full. This file records what is specific to the
 TypeScript SDK.
 
@@ -26,7 +26,7 @@ Do not open a public issue.
 ## Out of scope here
 
 - Missing hardening in the example servers — those live in
-  `pmcp-servers`, not here.
+  `pcp-servers`, not here.
 - Dependency CVEs in transitive packages. Report those to the package
   registry; we pick them up through automated audits.
 - Absence of features. This SDK is a skeleton: it has no test suite

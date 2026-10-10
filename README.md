@@ -1,4 +1,4 @@
-# pmcp-typescript
+# pcp-typescript
 
 TypeScript/Node SDK for PCP — the client and server surface for a
 Node runtime.
@@ -50,8 +50,8 @@ change `scripts.test` back to `jest` and add a `jest.config.*`.
 - No test coverage.
 - No CI wiring beyond the org-level typescript-sdk job (which currently
   only verifies `npm run build`).
-- Types have not been re-checked against `pmcp-spec` v0.5 since the
-  split — the intended source-of-truth is `pmcp-spec/schema/`, which
+- Types have not been re-checked against `pcp-spec` v0.5 since the
+  split — the intended source-of-truth is `pcp-spec/schema/`, which
   itself does not yet cover the JSON-RPC method surface.
 
 ## License

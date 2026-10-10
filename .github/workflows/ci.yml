@@ -1,4 +1,4 @@
-name: pmcp-typescript CI
+name: pcp-typescript CI
 
 # Honest about what this repository is: a skeleton, and one that does not
 # currently compile.
@@ -60,7 +60,7 @@ jobs:
   # 32 > 19. The 19 is pcp-ledger's error count -- a Rust number that had
   # been copied into this TypeScript workflow, presumably because both
   # "fail to compile" and "19" were already in circulation. The effect was
-  # that pmcp-typescript could never go green, and the release gate would
+  # that pcp-typescript could never go green, and the release gate would
   # have blocked forever on a baseline that was never a measurement of
   # this package.
   error-budget:
@@ -107,7 +107,7 @@ jobs:
             echo "::notice::workflow and make this job assert it actually runs."
             exit 0
           fi
-          echo "::warning title=No test suite::pmcp-typescript ships no tests."
+          echo "::warning title=No test suite::pcp-typescript ships no tests."
           echo "::warning::\`npm test\` exits 0 without running anything. That is a"
           echo "::warning::placeholder, not a passing suite."
 
@@ -119,7 +119,7 @@ jobs:
     steps:
       - name: Report status
         run: |
-          echo "## pmcp-typescript CI Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "## pcp-typescript CI Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Job | Blocking? | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-----|-----------|--------|" >> "$GITHUB_STEP_SUMMARY"

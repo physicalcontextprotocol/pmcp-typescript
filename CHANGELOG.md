@@ -1,4 +1,4 @@
-# Changelog — pmcp-typescript
+# Changelog — pcp-typescript
 
 All notable changes to the `physicalcontextprotocol` TypeScript SDK. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
@@ -44,7 +44,7 @@ finished — it is a skeleton, and the changelog says so.**
 ### Changed
 
 - Repository metadata in `package.json` now points at
-  `github.com/physicalcontextprotocol/pmcp-typescript`.
+  `github.com/physicalcontextprotocol/pcp-typescript`.
 - Moved out of the monorepo into its own repository, deliberately, so
   the three SDKs read as peer implementations rather than one
   reference implementation plus two bindings.
@@ -73,7 +73,7 @@ finished — it is a skeleton, and the changelog says so.**
   architecture decision, deliberately not made silently here.
 
   **`bid_energy_j` is a genuine spec question, not a naming slip.**
-  `pmcp-spec`'s `LeaseGrant` has no energy-bid field at all, so either
+  `pcp-spec`'s `LeaseGrant` has no energy-bid field at all, so either
   the schema is missing a concept the SDK assumes, or the SDK is
   referencing a concept that was dropped. That needs an answer from
   someone who knows which.
@@ -83,6 +83,6 @@ finished — it is a skeleton, and the changelog says so.**
   CI's only *blocking* job is an error-budget check that stops the 19
   compile errors from growing.
 - The highest-value addition would be the ability to run the shared
-  `pmcp-conformance` suite against this implementation. That is what
+  `pcp-conformance` suite against this implementation. That is what
   would make the parity claim checkable rather than asserted.
 - `npm publish` is not wired up; there is no CI release job.

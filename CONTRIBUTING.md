@@ -1,4 +1,4 @@
-# Contributing to pmcp-typescript
+# Contributing to pcp-typescript
 
 The TypeScript/Node SDK — `physicalcontextprotocol`.
 
@@ -38,7 +38,7 @@ in this repository, and it is an architecture decision, so it is not
 made by a drive-by type fix. If you take it on, say which one you picked
 and why, and delete the other rather than leaving it exported-but-dimmed.
 
-**2. `bid_energy_j` does not exist on `LeaseGrant`.** `pmcp-spec`'s
+**2. `bid_energy_j` does not exist on `LeaseGrant`.** `pcp-spec`'s
 `LeaseGrant` has no energy-bid field at all. So either the schema is
 missing a concept this SDK assumes, or the SDK is referencing something
 that was dropped during the type-consolidation work. This one needs
@@ -71,7 +71,7 @@ what is and is not implemented. In short:
 ## High-value contributions
 
 - A real test suite, especially one that runs the shared
-  `pmcp-conformance` suite against this implementation. That is the
+  `pcp-conformance` suite against this implementation. That is the
   thing that would make the "three peer SDKs" claim checkable rather
   than asserted.
 - Client and server lifecycle, transport selection, and reconnect
@@ -82,8 +82,8 @@ what is and is not implemented. In short:
 
 ## Before you claim parity
 
-If a change makes this SDK behave differently from `pmcp-python` or
-`pmcp-rust` for the same input, say so in the PR description. The wire
+If a change makes this SDK behave differently from `pcp-python` or
+`pcp-rust` for the same input, say so in the PR description. The wire
 format is meant to be identical across all three, and divergence is a
 bug in one of them — usually the newest.
 
